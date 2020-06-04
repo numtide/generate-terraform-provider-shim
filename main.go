@@ -61,7 +61,7 @@ func main() {
 				return err
 			}
 
-			return release.generateShims(".terraform", pluginName)
+			return release.generateShims("terraform.d", pluginName)
 
 		},
 	}
