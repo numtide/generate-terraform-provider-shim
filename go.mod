@@ -1,4 +1,4 @@
-module github.com/draganm/generate-provider-shim
+module github.com/numtide/generate-terraform-provider-shim
 
 go 1.14
 
