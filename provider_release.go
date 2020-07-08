@@ -1,18 +1,14 @@
 package main
 
 import (
-	"archive/tar"
-	"compress/gzip"
 	"context"
-	"crypto/sha1"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/google/go-github/v32/github"
@@ -22,63 +18,6 @@ import (
 type providerRelease struct {
 	version *semver.Version
 	plugins map[string]string
-}
-
-func getShaOfFileFromURL(url, fileName string) ([]byte, error) {
-	res, err := http.DefaultClient.Get(url)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while getting %s", url)
-	}
-
-	defer res.Body.Close()
-
-	gr, err := gzip.NewReader(res.Body)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while unzipping plugin attachment %s", url)
-	}
-
-	tr := tar.NewReader(gr)
-
-	for {
-		hdr, err := tr.Next()
-
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return nil, errors.Wrapf(err, "while reading tar archive %s", url)
-		}
-
-		if hdr.Name == fileName {
-			sh := sha1.New()
-			_, err = sh.Write([]byte(fmt.Sprintf("blob %d", hdr.Size)))
-			if err != nil {
-				return nil, errors.Wrap(err, "while writing to sha")
-			}
-
-			_, err = sh.Write([]byte{0})
-			if err != nil {
-				return nil, errors.Wrap(err, "while writing to sha")
-			}
-
-			_, err = io.Copy(sh, tr)
-			if err != nil {
-				return nil, errors.Wrap(err, "while writing to sha")
-			}
-
-			return sh.Sum(nil), nil
-
-		} else {
-			_, err = io.Copy(ioutil.Discard, tr)
-			if err != nil {
-				return nil, errors.Wrap(err, "while writing reading tar archive")
-			}
-		}
-	}
-
-	return nil, errors.Errorf("file %s not found in %s", fileName, url)
-
 }
 
 func (p providerRelease) generateShims(dir, pluginName string) error {
@@ -108,12 +47,7 @@ func (p providerRelease) generateShims(dir, pluginName string) error {
 		binaryName := fmt.Sprintf("terraform-provider-%s_v%s", pluginName, p.version.String())
 		log.Println("[DEBUG] binary name", binaryName)
 
-		sha, err := getShaOfFileFromURL(url, binaryName)
-		if err != nil {
-			return err
-		}
-
-		shimText, err := generateShim(url, pluginName, p.version.String(), binaryName, sha)
+		shimText, err := generateShim(url, pluginName, p.version.String(), binaryName)
 
 		shimFileName := filepath.Join(pluginDir, binaryName)
 
@@ -143,7 +77,9 @@ func repoReleaseToProviderRelease(r *github.RepositoryRelease) (providerRelease,
 
 	for _, a := range r.Assets {
 		matches, arch := matchTerraformProviderAssetName(a.GetName())
-		if matches {
+
+		// there is no point in generating windows shim, so skip it.
+		if matches && !strings.Contains(arch, "windows") {
 			pr.plugins[arch] = a.GetBrowserDownloadURL()
 		}
 	}

@@ -72,7 +72,7 @@ func main() {
 
 // terraform-provider-linuxbox_v0.0.13_darwin_amd64.tar.gz
 
-var assetNamePattern = regexp.MustCompile(`^terraform-provider-[^_]+_(v[0-9]+\.[0-9]+\.[0-9]+)_([^_]+_[^_]+)(.tar.gz)$`)
+var assetNamePattern = regexp.MustCompile(`^terraform-provider-[^_]+_(v?[0-9]+\.[0-9]+\.[0-9]+)_([^_]+_[^_]+)(.tar.gz|.zip)$`)
 
 func matchTerraformProviderAssetName(s string) (bool, string) {
 	r := assetNamePattern.FindStringSubmatch(s)

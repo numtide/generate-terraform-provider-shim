@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bytes"
-	"encoding/hex"
-	"text/template"
+	"strings"
 
+	"github.com/numtide/generate-terraform-provider-shim/shim/targz"
+	zipshim "github.com/numtide/generate-terraform-provider-shim/shim/zip"
 	"github.com/pkg/errors"
 )
 
@@ -50,25 +50,16 @@ type templateData struct {
 	SHA1        string
 }
 
-func generateShim(downloadURL, pluginName, version, binaryName string, hash []byte) (string, error) {
-	t, err := template.New("shim").Parse(shimTemplate)
-	if err != nil {
-		return "", errors.Wrap(err, "while parsing shim template")
+func generateShim(downloadURL, pluginName, version, binaryName string) (string, error) {
+
+	if strings.HasSuffix(downloadURL, ".tar.gz") {
+		return targz.GenerateShim(downloadURL, pluginName, version, binaryName)
 	}
 
-	bb := new(bytes.Buffer)
-	err = t.Execute(bb, templateData{
-		DownloadURL: downloadURL,
-		PluginName:  pluginName,
-		Version:     version,
-		BinaryName:  binaryName,
-		SHA1:        hex.EncodeToString(hash[:]),
-	})
-
-	if err != nil {
-		return "", errors.Wrap(err, "while rendering template")
+	if strings.HasSuffix(downloadURL, ".zip") {
+		return zipshim.GenerateShim(downloadURL, pluginName, version, binaryName)
 	}
 
-	return bb.String(), nil
+	return "", errors.New("cannot generate shim")
 
 }
