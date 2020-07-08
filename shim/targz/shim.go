@@ -41,7 +41,7 @@ if [[ -f "${plugin_binary_path}" ]]; then
 fi
 
 if [[ ! -f "${plugin_binary_path}" ]]; then
-    curl -sL "${plugin_url}" | tar xzvfC - "${plugin_unpack_dir}"
+    curl -sL "${plugin_url}" | tar xzfC - "${plugin_unpack_dir}"
     chmod 755 "${plugin_binary_path}"
 fi
 
