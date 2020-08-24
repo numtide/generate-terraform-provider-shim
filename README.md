@@ -80,7 +80,7 @@ Shim generator is integrating tightly with GitHub's API to find release archives
 (we are open to accepting PRs to support other sources)
 
 ### Only providers with releases with attached binaries are supported
-We are relying on developers of the providers to create releases with attached compiled binaries of the providers for different archs.
+We are relying on the developers of the provider to create releases with attached compiled binaries of the providers for different architectures.
 If that is not the case, there shim cannot be generated.
 
 ### Only .tar.gz and .zip archives are supported
