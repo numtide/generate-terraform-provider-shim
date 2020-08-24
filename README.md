@@ -77,6 +77,8 @@ Generated shims will let providers appear as if they were downloaded through Has
 ### Only GitHub hosted providers
 Shim generator is integrating tightly with GitHub's API to find release archives, hence will be able to generate shims only for the providers that are available on GitHub.
 
+(we are open to accepting PRs to support other sources)
+
 ### Only providers with releases with attached binaries are supported
 We are relying on developers of the providers to create releases with attached compiled binaries of the providers for different archs.
 If that is not the case, there shim cannot be generated.
