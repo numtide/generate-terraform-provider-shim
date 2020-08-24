@@ -67,7 +67,7 @@ will generate provider shims for Linuxbox provider in the `.terraform/plugins/` 
 ## Terraform 0.13 support
 
 At the moment, there are plenty of community providers that are not available in the Hashicorp's registry and are not running registries of their own.
-This will change with time and this tool will be less useful, but for the transition period, this tool will generate shims in the correct paths for both terraform 0.12 and 0.13.
+This will change with time and this tool will become less useful, but for the transition period, this tool will generate shims in the correct paths for both terraform 0.12 and 0.13.
 
 Generated shims will let providers appear as if they were downloaded through Hashicorp's registry, so there is no need to add an entry in `terraform{ required_providers{} }` specifying the location of the provider registry.
 
