@@ -20,42 +20,60 @@ type providerRelease struct {
 	plugins map[string]string
 }
 
+func storeFile(path string, content []byte) error {
+	dir := filepath.Dir(path)
+
+	st, err := os.Stat(dir)
+	if err != nil && !os.IsNotExist(err) {
+		return errors.Wrapf(err, "while getting stat of %s", dir)
+	}
+
+	if err == nil && !st.IsDir() {
+		return errors.Errorf("%s is not a directory", dir)
+	}
+
+	if os.IsNotExist(err) {
+		log.Println("[DEBUG] creating plugin dir", dir)
+		err = os.MkdirAll(dir, 0700)
+		if err != nil {
+			return errors.Wrapf(err, "while creating dir %s", dir)
+		}
+	}
+
+	err = ioutil.WriteFile(path, content, 0700)
+	if err != nil {
+		return errors.Wrapf(err, "while writing to file %s", path)
+	}
+
+	return nil
+
+}
+
 func (p providerRelease) generateShims(dir, pluginName string) error {
 	for arch, url := range p.plugins {
-
-		pluginDir := filepath.Join(dir, "plugins", arch)
-
-		log.Println("[DEBUG] plugin dir", pluginDir)
-
-		st, err := os.Stat(pluginDir)
-		if err != nil && !os.IsNotExist(err) {
-			return errors.Wrapf(err, "while getting stat of %s", pluginDir)
-		}
-
-		if err == nil && !st.IsDir() {
-			return errors.Errorf("%s is not a directory", pluginDir)
-		}
-
-		if os.IsNotExist(err) {
-			log.Println("[DEBUG] creating plugin dir", pluginDir)
-			err = os.MkdirAll(pluginDir, 0700)
-			if err != nil {
-				return errors.Wrapf(err, "while creating dir %s", pluginDir)
-			}
-		}
 
 		binaryName := fmt.Sprintf("terraform-provider-%s_v%s", pluginName, p.version.String())
 		log.Println("[DEBUG] binary name", binaryName)
 
 		shimText, err := generateShim(url, pluginName, p.version.String(), binaryName)
 
-		shimFileName := filepath.Join(pluginDir, binaryName)
+		pluginDir := filepath.Join(dir, "plugins", arch)
+		log.Println("[DEBUG] plugin dir", pluginDir)
 
-		log.Println("[DEBUG] shim file name", shimFileName)
+		shimFileName012 := filepath.Join(pluginDir, binaryName)
+		log.Println("[DEBUG] shim file name for terraform 0.12:", shimFileName012)
 
-		err = ioutil.WriteFile(shimFileName, []byte(shimText), 0700)
+		err = storeFile(shimFileName012, []byte(shimText))
 		if err != nil {
-			return errors.Wrapf(err, "while writing to file %s", shimFileName)
+			return err
+		}
+
+		shimFileName013 := filepath.Join(dir, "plugins", "registry.terraform.io", "hashicorp", pluginName, p.version.String(), arch, binaryName)
+		log.Println("[DEBUG] shim file name for terraform 0.13:", shimFileName013)
+
+		err = storeFile(shimFileName013, []byte(shimText))
+		if err != nil {
+			return err
 		}
 
 	}
