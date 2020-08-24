@@ -50,7 +50,7 @@ fi
 exec "${plugin_binary_path}" $@
 ```
 
-With release of Terraform 0.13.x there is a standardized way of distributing the provider binaries, but the burden of running a provider registry and signing provider binaries is on the provider developers. 
+With the release of Terraform 0.13.x there is a standardized way of distributing the provider binaries, but the burden of running a provider registry and signing provider binaries is on the provider developers. 
 This means that most of the providers will not be immediately available through a registry.
 For such providers, provider shims is a stopgap solution until community providers can be downloaded through a registry.
 
