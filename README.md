@@ -89,4 +89,4 @@ Most of the time they are packaged in a Zip or Gzipped Tar archive - those are f
 If you would like us to add support for some other formats, please create an issue in this repo with a link to the specific provider you would like us to support.
 
 ### Windows is not supported
-We do not have access to a Windows machine and have never run terraform in Windows environment, hence the generated shims will definitely not work under Windows.
+We do not have access to a Windows machine and have never run terraform in a Windows environment, hence the generated shims will definitely not work under Windows.
