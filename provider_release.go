@@ -122,7 +122,7 @@ func findLatestReleaseWithPluginAssets(ctx context.Context, gcl *github.Client, 
 
 		for _, r := range releases {
 			pr, err := repoReleaseToProviderRelease(r)
-			if err == nil {
+			if err == nil && pr.version != nil {
 				if constraints.Check(pr.version) {
 					providerReleases = append(providerReleases, pr)
 				}
